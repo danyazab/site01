@@ -57,45 +57,50 @@ import (
 func main() {
 	e := echo.New()
 
-	// Routes
-	e.POST("/name", createUser)
-	e.GET("/name/:key", getUser)
-	//e.GET("/name", allUsers)
-	e.PUT("/name/:key", updateUser)
-	e.DELETE("/name/:key", deleteUser)
+	e.POST("/my-db/:dbName/:key", createUser)
+	e.GET("/my-db/:dbName/:key", getUser)
+	e.PUT("/my-db/:dbName/:key", updateUser)
+	e.DELETE("/my-db/:dbName/:key", deleteUser)
 
-	// Start server
+	e.POST("/my-db/:dbName", createDb)
+	e.GET("/my-db/:dbName", getDb)
+	e.GET("/my-db/", listDb)
+	e.DELETE("/my-db/:dbName", deleteDb)
+
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
 type (
 	user struct {
-		KEY  int    `json:"key"`
-		Name string `json:"name"`
+		KEY  interface{} `json:"key"`
+		Name interface{} `json:"name"`
 	}
 )
 
 var (
-	users = map[int]*user{}
-	pr    = 1
+	users = map[interface{}]*user{}
 )
 
 func createUser(c echo.Context) error {
+	per := c.QueryParam("key")
 	u := &user{
-		KEY: pr,
+		KEY: per,
 	}
 
 	if err := c.Bind(u); err != nil {
 		return err
 	}
-	users[u.KEY] = u
-	pr++
+	users[c.Param("key")] = u
+
 	return c.JSON(http.StatusCreated, u)
 }
 
 func getUser(c echo.Context) error {
-	key, _ := strconv.Atoi(c.Param("key"))
-	return c.JSON(http.StatusOK, users[key])
+	res, err := users[c.Param("key")]
+	if !err {
+		return c.String(http.StatusNotFound, "There is no such key")
+	}
+	return c.JSON(http.StatusOK, res)
 }
 
 func updateUser(c echo.Context) error {
@@ -103,9 +108,8 @@ func updateUser(c echo.Context) error {
 	if err := c.Bind(u); err != nil {
 		return err
 	}
-	key, _ := strconv.Atoi(c.Param("key"))
-	users[key].Name = u.Name
-	return c.JSON(http.StatusOK, users[key])
+	users[c.Param("key")].Name = u.Name
+	return c.JSON(http.StatusOK, u.Name)
 }
 
 func deleteUser(c echo.Context) error {
@@ -118,3 +122,25 @@ func deleteUser(c echo.Context) error {
 
 //return c.JSON(http.StatusOK, &aif)
 //}
+
+func createDb(c echo.Context) error {
+
+	//c.Param(("Db") := new(map[interface{}]*user)
+
+	return c.JSON(http.StatusCreated, "")
+}
+func getDb(c echo.Context) error {
+
+	return c.JSON(http.StatusOK, "")
+
+}
+func listDb(c echo.Context) error {
+
+	return c.JSON(http.StatusOK, "")
+
+}
+func deleteDb(c echo.Context) error {
+
+	return c.NoContent(http.StatusNoContent)
+
+}
