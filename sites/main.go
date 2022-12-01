@@ -49,7 +49,7 @@ var perR interface{}
 func createUser(c echo.Context) error {
 	//per1 := c.QueryParam("dbName")
 	per := c.QueryParam("key")
-	perR = c.QueryParam("dbName")
+	per1 := c.QueryParam("dbName")
 
 	//var x user
 	u := &user{
@@ -65,7 +65,15 @@ func createUser(c echo.Context) error {
 	if err := c.Bind(u); err != nil {
 		return err
 	}
+	//
 	DbU[c.Param("key")] = u
+	s := DbU
+	ss := &base{
+		dbName: per1,
+		Vmist:  s,
+	}
+
+	DbS[c.Param("dbName")] = ss
 
 	return c.JSON(http.StatusCreated, u)
 }
@@ -103,7 +111,7 @@ func createDb(c echo.Context) error {
 
 	u := &base{
 		dbName: per,
-		Vmist:  DbU,
+		//Vmist:  user{},
 	}
 	//DbS["dbName"] = &base{
 	//	dbName: per,
