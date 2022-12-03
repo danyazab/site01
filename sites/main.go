@@ -1,10 +1,9 @@
 package main
 
 import (
-	_ "database/sql"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"strconv"
+	"time"
 )
 
 func main() {
@@ -35,8 +34,9 @@ var (
 
 type (
 	user struct {
-		KEY  string `json:"key"`
-		Name string `json:"name"`
+		KEY        string
+		Name       string `json:"name"`
+		TimeCreate interface{}
 	}
 	base struct {
 		dbName string
@@ -44,43 +44,41 @@ type (
 	}
 )
 
-var perR interface{}
-
 func createUser(c echo.Context) error {
-	//per1 := c.QueryParam("dbName")
-	per := c.QueryParam("key")
-	per1 := c.QueryParam("dbName")
+	for {
+		per := c.QueryParam("key")
+		per1 := c.QueryParam("dbName")
 
-	//var x user
-	u := &user{
-		//DbName: per1,
-		KEY: per,
+		u := &user{
+			KEY:        per,
+			TimeCreate: time.Now(),
+		}
+
+		if err := c.Bind(u); err != nil {
+			return err
+		}
+		_, ok := DbU[c.Param("key")]
+		if ok {
+			return c.String(http.StatusBadRequest, "It is not possible to create an existing one")
+			continue
+		}
+		DbU[c.Param("key")] = u
+
+		s := DbU
+		ss := &base{
+			dbName: per1,
+			Vmist:  s,
+		}
+		DbS[c.Param("dbName")] = ss
+
+		return c.JSON(http.StatusCreated, u)
+
 	}
-
-	//DbU["key"] = &user{
-	//	//DbName: per1,
-	//	KEY: per,
-	//}
-
-	if err := c.Bind(u); err != nil {
-		return err
-	}
-	//
-	DbU[c.Param("key")] = u
-	s := DbU
-	ss := &base{
-		dbName: per1,
-		Vmist:  s,
-	}
-
-	DbS[c.Param("dbName")] = ss
-
-	return c.JSON(http.StatusCreated, u)
 }
 
 func getUser(c echo.Context) error {
-	res, err := DbU[c.Param("key")]
-	if !err {
+	res, ok := DbU[c.Param("key")]
+	if !ok {
 		return c.String(http.StatusNotFound, "There is no such key")
 	}
 	return c.JSON(http.StatusOK, res)
@@ -96,35 +94,26 @@ func updateUser(c echo.Context) error {
 }
 
 func deleteUser(c echo.Context) error {
-	key, _ := strconv.Atoi(c.Param("key"))
-	delete(DbU, string(key))
+	delete(DbU, c.Param("key"))
 	return c.NoContent(http.StatusNoContent)
 }
 
 func createDb(c echo.Context) error {
-	//un := new(base)
 	per := c.QueryParam("dbName")
-	//ne := new(db)
-	//gra := user{
-	//	KEY:  un.KEY,
-	//	Name: un.Name}
 
 	u := &base{
 		dbName: per,
 		//Vmist:  user{},
 	}
-	//DbS["dbName"] = &base{
-	//	dbName: per,
-	//	Vmist:  ne,
-	//}
-
 	if err := c.Bind(u); err != nil {
 		return err
 	}
+
 	DbS[c.Param("dbName")] = u
 
 	return c.JSON(http.StatusCreated, u)
 }
+
 func getDb(c echo.Context) error {
 
 	res, err := DbS[c.Param("dbName")]
@@ -135,12 +124,10 @@ func getDb(c echo.Context) error {
 }
 
 func listDb(c echo.Context) error {
-
 	return c.JSON(http.StatusOK, DbS)
-
 }
+
 func deleteDb(c echo.Context) error {
-	key, _ := strconv.Atoi(c.Param("dbName"))
-	delete(DbS, string(key))
+	delete(DbS, c.Param("dbName"))
 	return c.NoContent(http.StatusNoContent)
 }
