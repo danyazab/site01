@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/labstack/echo/v4"
-	"site01/site/internal"
+	"site01/internal"
 )
 
 func main() {
