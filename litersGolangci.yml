@@ -1,6 +1,6 @@
 linters-settings:
   gci:
-    local-prefixes: твій проджект
+    local-prefixes: site01
     sections:
       - standard # Standard section: captures all standard packages.
       - default # Default section: contains all imports that could not be matched to another section type.

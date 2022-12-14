@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"site01/internal/db"
@@ -10,30 +11,20 @@ import (
 
 func CreateUser(c echo.Context) error {
 	for {
-		per := c.QueryParam("key")
-		per1 := c.QueryParam("dbName")
-
-		u := &models.User{
-			KEY:        per,
+		u := models.User{
 			TimeCreate: time.Now(),
 		}
-
-		if err := c.Bind(u); err != nil {
-			return err
-		}
-		_, ok := db.DbU[c.Param("key")]
-		if ok {
-			return c.String(http.StatusBadRequest, "It is not possible to create an existing one")
+		_, ok := db.DbS[c.Param("dbName")]
+		if !ok {
+			return c.String(http.StatusNotFound, "Please creat first db")
 			continue
+		}
+		if err := c.Bind(&u); err != nil {
+			return c.String(http.StatusBadRequest, "bad request")
 		}
 		db.DbU[c.Param("key")] = u
 
-		s := db.DbU
-		ss := &models.Base{
-			DbName: per1,
-			Vmist:  s,
-		}
-		db.DbS[c.Param("dbName")] = ss
+		db.DbS[c.Param("dbName")][c.Param("key")] = u
 
 		return c.JSON(http.StatusCreated, u)
 
@@ -49,42 +40,38 @@ func GetUser(c echo.Context) error {
 }
 
 func UpdateUser(c echo.Context) error {
-	u := new(models.User)
-	if err := c.Bind(u); err != nil {
+	u := models.User{
+		TimeUpdate: time.Now(),
+	}
+	if err := c.Bind(&u); err != nil {
 		return err
 	}
-	db.DbU[c.Param("key")].Name = u.Name
+	db.DbS[c.Param("dbName")][c.Param("key")] = u
 	return c.JSON(http.StatusOK, u.Name)
 }
 
 func DeleteUser(c echo.Context) error {
-	delete(db.DbU, c.Param("key"))
+	delete(db.DbS[c.Param("dbName")], c.Param("key"))
 	return c.NoContent(http.StatusNoContent)
 }
 
 func CreateDb(c echo.Context) error {
-	per := c.QueryParam("dbName")
-
-	u := &models.Base{
-		DbName: per,
-		//Vmist:  user{},
+	mm, ok := db.DbS[c.Param("dbName")]
+	if !ok {
+		mm = make(map[string]models.User)
+		db.DbS[c.Param("dbName")] = mm
 	}
-	if err := c.Bind(u); err != nil {
-		return err
-	}
-
-	db.DbS[c.Param("dbName")] = u
-
-	return c.JSON(http.StatusCreated, u)
+	return c.JSON(http.StatusCreated, "Created")
 }
 
 func GetDb(c echo.Context) error {
-
-	res, err := db.DbS[c.Param("dbName")]
+	ss := len(db.DbS[c.Param("dbName")])
+	mm, err := db.DbS[c.Param("dbName")]
+	ee := fmt.Sprintf("ddd %n ff %b", ss, mm)
 	if !err {
 		return c.String(http.StatusNotFound, "There is no such key")
 	}
-	return c.JSON(http.StatusOK, res)
+	return c.JSON(http.StatusOK, ee)
 }
 
 func ListDb(c echo.Context) error {

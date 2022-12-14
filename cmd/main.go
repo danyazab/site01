@@ -18,6 +18,6 @@ func main() {
 	e.GET("/my-db/", internal.ListDb)
 	e.DELETE("/my-db/:dbName", internal.DeleteDb)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8088"))
 
 }
