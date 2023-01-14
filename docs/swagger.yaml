@@ -1,0 +1,382 @@
+definitions:
+  db.Db:
+    additionalProperties:
+      $ref: '#/definitions/db.DbUser'
+    type: object
+  db.DbUser:
+    additionalProperties:
+      $ref: '#/definitions/models.User'
+    type: object
+  models.User:
+    properties:
+      name:
+        example: Danya
+        type: string
+      timeCreate:
+        type: string
+    type: object
+  resp.JSONBadReqResult:
+    properties:
+      code:
+        example: 400
+        type: integer
+      data: {}
+      message:
+        example: Wrong parameter
+        type: string
+    type: object
+  resp.JSONIntServerErrReqResult:
+    properties:
+      code:
+        example: 404
+        type: integer
+      data: {}
+      message:
+        example: This was not found
+        type: string
+    type: object
+  resp.JSONSuccessResult:
+    properties:
+      code:
+        example: 200
+        type: integer
+      data: {}
+      message:
+        example: Success
+        type: string
+    type: object
+host: localhost:8088
+info:
+  contact:
+    email: zabolotnijdanilo@gmail.com
+    name: Daniel Zab
+  description: It is Swagger of rest api Site01.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Site01 Service
+  version: "1.0"
+paths:
+  /my-db/:
+    get:
+      consumes:
+      - application/json
+      description: Get All list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONSuccessResult'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/db.Db'
+                message:
+                  type: string
+              type: object
+      summary: Get List with all DB and all User
+      tags:
+      - my-db
+  /my-db/{dbName}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete DB
+      parameters:
+      - description: Enter which base to delete
+        in: path
+        name: dbName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Delete DB
+      tags:
+      - DB
+    get:
+      consumes:
+      - application/json
+      description: Get DB
+      parameters:
+      - description: Write out from which database to extract
+        in: path
+        name: dbName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONSuccessResult'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/db.DbUser'
+                message:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONIntServerErrReqResult'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+      summary: Get user in DB
+      tags:
+      - DB
+    post:
+      consumes:
+      - application/json
+      description: Create DB
+      parameters:
+      - description: Enter in which database to create
+        in: path
+        name: dbName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONSuccessResult'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONBadReqResult'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONIntServerErrReqResult'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+      summary: Create DB
+      tags:
+      - DB
+  /my-db/{dbName}/{key}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete User
+      parameters:
+      - description: Write out from which database to extract
+        in: path
+        name: dbName
+        required: true
+        type: string
+      - description: Enter which key to extract
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONIntServerErrReqResult'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+      summary: Delete User in DB
+      tags:
+      - User
+    get:
+      consumes:
+      - application/json
+      description: Get User
+      parameters:
+      - description: Write out from which database to extract
+        in: path
+        name: dbName
+        required: true
+        type: string
+      - description: Enter which key to extract
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONSuccessResult'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/models.User'
+                message:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONIntServerErrReqResult'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+      summary: Get user in DB
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: Get User
+      parameters:
+      - description: Enter which database
+        in: path
+        name: enter_dbName
+        required: true
+        type: string
+      - description: Enter which key to create
+        in: path
+        name: rep_type
+        required: true
+        type: string
+      - description: CreateUser JSON
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONSuccessResult'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/models.User'
+                message:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONBadReqResult'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONIntServerErrReqResult'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+      summary: Create user in DB
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update User
+      parameters:
+      - description: Enter the changes in which database
+        in: path
+        name: dbName
+        required: true
+        type: string
+      - description: Commit the changes to the database
+        format: path
+        in: path
+        name: key
+        required: true
+        type: string
+      - description: UpdateUser JSON
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONSuccessResult'
+            - properties:
+                code:
+                  type: integer
+                data:
+                  $ref: '#/definitions/models.User'
+                message:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/resp.JSONIntServerErrReqResult'
+            - properties:
+                code:
+                  type: integer
+                message:
+                  type: string
+              type: object
+      summary: Update user in DB
+      tags:
+      - User
+swagger: "2.0"
