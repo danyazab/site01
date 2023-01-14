@@ -4,11 +4,11 @@ import (
 	"site01/internal/models"
 )
 
-type dbUser map[string]models.User
-type db map[string]dbUser
+type DbUser map[string]models.User
+type Db map[string]DbUser
 
 var (
 	DbU = make(map[string]models.User)
 
-	DbS db = make(map[string]dbUser)
+	DbS Db = make(map[string]DbUser)
 )
